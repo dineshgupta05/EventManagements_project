@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+
+            <!-- Flash Messages -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Profile Summary -->
+            <div class="card border-info shadow-sm mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">👤 Profile Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-3 text-center">
+                            {% if attendee.profile_photo %}
+                                <img src="{{ attendee.profile_photo.url }}" class="img-fluid rounded-circle border" style="width: 100px;" alt="Profile Photo">
+                            {% else %}
+                                <img src="{% static 'default_profile.png' %}" class="img-fluid rounded-circle border" style="width: 100px;" alt="Default">
+                            {% endif %}
+                        </div>
+                        <div class="col-md-9">
+                            <p><strong>Name:</strong> {{ attendee.name }}</p>
+                            <p><strong>Email:</strong> {{ attendee.email }}</p>
+                            {% if attendee.phone_number %}
+                                <p><strong>Phone:</strong> {{ attendee.phone_number }}</p>
+                            {% endif %}
+                            {% if attendee.gender %}
+                                <p><strong>Gender:</strong> {{ attendee.gender }}</p>
+                            {% endif %}
+                            {% if attendee.dob %}
+                                <p><strong>Date of Birth:</strong> {{ attendee.dob|date:"F j, Y" }}</p>
+                            {% endif %}
+                            {% if attendee.bio %}
+                                <p><strong>Bio:</strong> {{ attendee.bio }}</p>
+                            {% endif %}
+                            <p class="text-muted"><small>Registered for <strong>{{ attendee.event.title }}</strong> on {{ attendee.registered_at|date:"F j, Y, g:i A" }}</small></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Registered Events -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">📋 My Registered Events</h5>
+                </div>
+                <div class="card-body">
+                    {% if my_registrations %}
+                        <ul class="list-group">
+                            {% for reg in my_registrations %}
+                                <li class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong>{{ reg.event.title }}</strong> — {{ reg.event.date|date:"D, M d Y H:i" }}<br>
+                                            <small class="text-muted">{{ reg.event.description|truncatechars:60 }}</small>
+                                        </div>
+                                        <div>
+                                            {% if reg.event.date > now %}
+                                                <form action="{% url 'unregister_event' reg.event.id %}" method="post" class="d-inline">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-danger btn-sm">Unregister</button>
+                                                </form>
+                                            {% else %}
+                                                <span class="badge badge-secondary">Event Passed</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted">You haven’t registered for any events yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Profile Update Form -->
+            <div class="card shadow rounded">
+                <div class="card-header bg-primary text-white text-center">
+                    <h3 class="mb-0">✏️ Update Profile</h3>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="form-row">
+                            <!-- Profile Photo Update -->
+                            <div class="col-md-4 text-center mb-3">
+                                {% if attendee.profile_photo %}
+                                    <img src="{{ attendee.profile_photo.url }}" class="img-fluid rounded-circle border mb-2" style="width: 150px;" alt="Profile Photo">
+                                {% else %}
+                                    <img src="{% static 'default_profile.png' %}" class="img-fluid rounded-circle border mb-2" style="width: 150px;" alt="Default Photo">
+                                {% endif %}
+                                <div class="form-group">
+                                    {{ form.profile_photo.label_tag }}
+                                    {{ form.profile_photo }}
+                                    {% for error in form.profile_photo.errors %}
+                                        <div class="text-danger small">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <!-- Other Fields -->
+                            <div class="col-md-8">
+                                <div class="form-row">
+                                    {% for field in form %}
+                                        {% if field.name != 'profile_photo' %}
+                                            <div class="form-group col-md-6">
+                                                <label>{{ field.label }}</label>
+                                                {{ field }}
+                                                {% if field.help_text %}
+                                                    <small class="form-text text-muted">{{ field.help_text }}</small>
+                                                {% endif %}
+                                                {% for error in field.errors %}
+                                                    <div class="text-danger small">{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit -->
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-success px-4">💾 Save Profile</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

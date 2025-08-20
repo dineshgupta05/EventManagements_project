@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>👥 Attendees for "{{ event.title }}"</h2>
+<p><strong>Date:</strong> {{ event.date|date:"D, M d Y H:i" }}</p>
+
+
+<hr>
+
+{% if attendees %}
+  <table border="1" cellpadding="8">
+    <tr>
+      <th>#</th>
+      <th>Name</th>
+      <th>Email</th>
+      <th>Registered On</th>
+    </tr>
+    {% for attendee in attendees %}
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td>{{ attendee.name }}</td>
+        <td>{{ attendee.email }}</td>
+        <td>{{ attendee.registered_at|date:"D, M d Y H:i:s" }}</td>
+      </tr>
+    {% endfor %}
+  </table>
+{% else %}
+  <p><em>No attendees registered yet.</em></p>
+{% endif %}
+
+<p><a href="{% url 'export_event_csv' event.id %}">📥 Export to CSV</a></p>
+<a href="{% url 'event_manager_dashboard' %}">← Back to Dashboard</a>
+{% endblock %}

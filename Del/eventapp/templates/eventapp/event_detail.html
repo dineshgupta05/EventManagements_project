@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>📌 {{ event.title }}</h2>
+<p><strong>Date:</strong> {{ event.date|date:"D, M d Y H:i" }}</p>
+<p><strong>Description:</strong> {{ event.description }}</p>
+
+<hr>
+
+{% if request.session.role == 'EventManager' %}
+
+<h3>👥 Registered Attendees</h3>
+{% if attendees %}
+<ul>
+  {% for attendee in attendees %}
+  <li>{{ attendee.name }} — {{ attendee.email }}</li>
+  {% endfor %}
+</ul>
+{% else %}
+<p>No attendees registered yet.</p>
+{% endif %}
+
+
+<a href="{% url 'view_event_attendees' event.id %}" class="btn btn-sm btn-info mb-3">See Attendes</a>
+
+{% endif %}
+<br>
+<a href="{% url 'event_list' %}" class="btn btn-info active">← Back to Events</a>
+
+{% endblock %}
